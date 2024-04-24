@@ -128,6 +128,7 @@ jobs:
           retention-days: 7
 
   build-docker:
+    if: false # Disabled for SUSE builds
     runs-on: ubuntu-latest
     needs: [configure]
     env:
@@ -214,6 +215,7 @@ jobs:
           fi
 
   package-windows:
+    if: false # Disabled for SUSE builds
     runs-on: windows-2019
     defaults:
       run:
@@ -308,7 +310,7 @@ jobs:
 
   publish-github:
     runs-on: ubuntu-latest
-    needs: [configure, build, package-windows]
+    needs: [configure, build]
     if: ${{ startsWith(github.ref, 'refs/tags/v') && github.event_name != 'workflow_dispatch' }}
     env:
       VERSION: ${{ needs.configure.outputs.k6_version }}
@@ -321,6 +323,7 @@ jobs:
           name: binaries
           path: dist
       - name: Download Windows binaries
+        if: false # Disabled for SUSE builds
         uses: actions/download-artifact@v4
         with:
           name: binaries-windows
@@ -343,12 +346,12 @@ jobs:
           for asset in ./dist/*; do
             assets+=("$asset")
           done
-          gh release create "$VERSION" "${assets[@]}" --target "$GITHUB_SHA" -F "./release notes/${VERSION}.md"
+          gh release create "$VERSION" "${assets[@]}" --target "$GITHUB_SHA" -F "./release notes/${VERSION%-suse-*}.md"
 
   publish-packages:
     runs-on: ubuntu-latest
     needs: [configure, build, package-windows]
-    if: ${{ startsWith(github.ref, 'refs/tags/v') && github.event_name != 'workflow_dispatch' }}
+    if: false # Disabled for SUSE builds
     env:
       VERSION: ${{ needs.configure.outputs.k6_version }}
     steps:
@@ -360,6 +363,7 @@ jobs:
           name: binaries
           path: dist
       - name: Download Windows binaries
+        if: false # Disabled for SUSE builds
         uses: actions/download-artifact@v4
         with:
           name: binaries-windows
